@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Día de los Muertos Family Feud</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Montserrat:wght@400;600;800;900&display=swap" rel="stylesheet">
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        marigold: '#FF9900',
+                        magenta: '#D81B60',
+                        purpleDark: '#120524',
+                        purpleCard: '#2A0E4A',
+                        purpleLight: '#3D1B63',
+                        gold: '#FFD700',
+                        turquois: '#00E5FF'
+                    },
+                    fontFamily: {
+                        feud: ['Montserrat', 'sans-serif'],
+                        festive: ['Cinzel Decorative', 'cursive']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #0c0218;
+            background-image: 
+                radial-gradient(circle at 50% 20%, #3d1b63 0%, transparent 60%),
+                radial-gradient(circle at 10% 80%, #d81b6022 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, #ff990022 0%, transparent 40%);
+            color: #ffffff;
+            font-family: 'Montserrat', sans-serif;
+            min-height: 100vh;
+            user-select: none;
+        }
+
+        /* 3D Flip Card Animation */
+        .card-container {
+            perspective: 1000px;
+        }
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+            transform-style: preserve-3d;
+        }
+        .card-container.flipped .card-inner {
+            transform: rotateX(180deg);
+        }
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            display: flex;
+            align-items: center;
+            border-radius: 0.5rem;
+        }
+        .card-front {
+            background: linear-gradient(135deg, #2A0E4A 0%, #1A0633 100%);
+            border: 2px solid #FF9900;
+            box-shadow: inset 0 0 15px rgba(255, 153, 0, 0.3), 0 4px 10px rgba(0,0,0,0.5);
+            color: #FF9900;
+            justify-content: center;
+        }
+        .card-back {
+            background: linear-gradient(135deg, #D81B60 0%, #800E36 100%);
+            border: 2px solid #FFD700;
+            box-shadow: inset 0 0 15px rgba(255, 215, 0, 0.4), 0 4px 10px rgba(0,0,0,0.5);
+            color: white;
+            transform: rotateX(180deg);
+            justify-content: space-between;
+            padding: 0 1rem;
+        }
+
+        /* Papel Picado Banner Effect */
+        .papel-banner {
+            display: flex;
+            justify-content: space-around;
+            overflow: hidden;
+            padding: 10px 0;
+            background: rgba(0,0,0,0.2);
+        }
+        .flag {
+            width: 40px;
+            height: 50px;
+            clip-path: polygon(0% 0%, 100% 0%, 100% 80%, 50% 100%, 0% 80%);
+            animation: sway 3s ease-in-out infinite alternate;
+        }
+        @keyframes sway {
+            0% { transform: rotate(-3deg); }
+            100% { transform: rotate(3deg); }
+        }
+
+        /* Neon Glow Utility */
+        .glow-marigold {
+            text-shadow: 0 0 10px #FF9900, 0 0 20px #FF9900;
+        }
+        .glow-gold {
+            text-shadow: 0 0 10px #FFD700, 0 0 20px #FFD700;
+        }
+        .glow-magenta {
+            text-shadow: 0 0 10px #D81B60, 0 0 20px #D81B60;
+        }
+
+        /* Strike Overlay Animation */
+        @keyframes strikePop {
+            0% { transform: scale(0.2); opacity: 0; }
+            50% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-strike {
+            animation: strikePop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        /* Custom Scrollbars */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #120524;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #D81B60;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen justify-between overflow-x-hidden">
+
+    <!-- TOP HEADER / PAPEL PICADO -->
+    <header class="w-full">
+        <div class="papel-banner border-b border-marigold/30">
+            <div class="flag bg-marigold"></div>
+            <div class="flag bg-magenta" style="animation-delay: 0.2s;"></div>
+            <div class="flag bg-turquois" style="animation-delay: 0.4s;"></div>
+            <div class="flag bg-purpleLight" style="animation-delay: 0.6s;"></div>
+            <div class="flag bg-gold" style="animation-delay: 0.8s;"></div>
+            <div class="flag bg-marigold" style="animation-delay: 1s;"></div>
+            <div class="flag bg-magenta" style="animation-delay: 0.3s;"></div>
+            <div class="flag bg-turquois" style="animation-delay: 0.5s;"></div>
+            <div class="flag bg-gold" style="animation-delay: 0.7s;"></div>
+        </div>
+        
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-4">
+            <div class="flex items-center space-x-3">
+                <i class="fa-solid fa-skull-crossbones text-3xl text-marigold animate-pulse"></i>
+                <h1 class="font-festive text-2xl md:text-3xl font-bold tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-marigold via-gold to-magenta">
+                    Día de los Muertos FEUD
+                </h1>
+            </div>
+
+            <!-- Mode Switcher Navigation -->
+            <div class="flex bg-purpleCard border border-marigold/40 rounded-lg p-1 space-x-1">
+                <button id="navMainBtn" onclick="switchMode('main')" class="px-4 py-2 rounded-md font-bold text-sm transition-all bg-marigold text-purpleDark shadow-lg">
+                    <i class="fa-solid fa-tv mr-2"></i>Main Rounds (1-5)
+                </button>
+                <button id="navFastBtn" onclick="switchMode('fast')" class="px-4 py-2 rounded-md font-bold text-sm transition-all text-gray-300 hover:text-white hover:bg-purpleLight">
+                    <i class="fa-solid fa-bolt mr-2 text-gold"></i>Fast Money
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN GAME BOARD SECTION -->
+    <main id="mainGameSection" class="max-w-6xl w-full mx-auto px-4 py-4 flex-grow flex flex-col justify-between">
+        
+        <!-- SCOREBOARD & ACTIVE POT -->
+        <div class="grid grid-cols-12 gap-4 items-center mb-6">
+            <!-- Team 1 Score -->
+            <div class="col-span-4 md:col-span-3 bg-purpleCard border-2 border-turquois rounded-xl p-3 text-center shadow-2xl relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-1 bg-turquois"></div>
+                <div class="text-xs md:text-sm font-semibold text-turquois uppercase tracking-widest mb-1">Team 1</div>
+                <div id="team1Score" class="text-3xl md:text-5xl font-black text-white glow-gold">0</div>
+                <button onclick="awardPoints(1)" class="mt-2 w-full py-1 bg-turquois/20 hover:bg-turquois/40 text-turquois border border-turquois/50 rounded text-xs font-bold transition">
+                    + Add Pot
+                </button>
+            </div>
+
+            <!-- Center Pot & Round Display -->
+            <div class="col-span-4 md:col-span-6 text-center flex flex-col items-center">
+                <div id="roundIndicator" class="text-xs md:text-sm font-bold text-marigold tracking-widest uppercase mb-1">
+                    Round 1 of 5
+                </div>
+                <div class="bg-gradient-to-b from-purpleLight to-purpleDark border-2 border-gold rounded-2xl px-6 py-2 shadow-2xl min-w-[160px]">
+                    <div class="text-[10px] md:text-xs text-gold uppercase tracking-widest font-semibold">Current Board Pot</div>
+                    <div id="currentPot" class="text-4xl md:text-6xl font-black text-gold glow-gold">0</div>
+                </div>
+            </div>
+
+            <!-- Team 2 Score -->
+            <div class="col-span-4 md:col-span-3 bg-purpleCard border-2 border-magenta rounded-xl p-3 text-center shadow-2xl relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-1 bg-magenta"></div>
+                <div class="text-xs md:text-sm font-semibold text-magenta uppercase tracking-widest mb-1">Team 2</div>
+                <div id="team2Score" class="text-3xl md:text-5xl font-black text-white glow-gold">0</div>
+                <button onclick="awardPoints(2)" class="mt-2 w-full py-1 bg-magenta/20 hover:bg-magenta/40 text-magenta border border-magenta/50 rounded text-xs font-bold transition">
+                    + Add Pot
+                </button>
+            </div>
+        </div>
+
+        <!-- QUESTION TITLE DISPLAY -->
+        <div class="bg-purpleCard/80 border border-marigold/30 rounded-xl p-4 mb-6 text-center shadow-xl backdrop-blur-md">
+            <h2 id="questionText" class="text-lg md:text-2xl font-bold text-white tracking-wide">
+                Question Loading...
+            </h2>
+        </div>
+
+        <!-- BOARD ANSWERS GRID -->
+        <div id="answersGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <!-- Dynamic 3D flip card slots will be injected here -->
+        </div>
+
+        <!-- HOST CONTROL PANEL -->
+        <div class="bg-purpleCard border border-marigold/40 rounded-2xl p-4 shadow-2xl">
+            <div class="text-xs font-bold text-marigold/80 uppercase tracking-widest mb-3 flex items-center justify-between">
+                <span><i class="fa-solid fa-sliders mr-2"></i>Host Control Panel</span>
+                <span id="strikeCounterDisplay" class="text-magenta">Strikes: 0/3</span>
+            </div>
+            
+            <div class="flex flex-wrap items-center justify-between gap-3">
+                <!-- Strike Controls -->
+                <div class="flex items-center space-x-2">
+                    <button onclick="addStrike()" class="px-4 py-2.5 bg-red-600 hover:bg-red-500 text-white font-black rounded-xl shadow-lg flex items-center space-x-2 transition active:scale-95">
+                        <i class="fa-solid fa-xmark text-xl"></i>
+                        <span>STRIKE (X)</span>
+                    </button>
+                    <button onclick="clearStrikes()" class="px-3 py-2.5 bg-gray-700 hover:bg-gray-600 text-gray-200 text-xs font-bold rounded-xl transition">
+                        Reset Strikes
+                    </button>
+                </div>
+
+                <!-- Reveal All / Round Controls -->
+                <div class="flex items-center space-x-2 flex-wrap gap-2">
+                    <button onclick="revealAllAnswers()" class="px-3 py-2 bg-purpleLight hover:bg-purple-700 border border-gold/40 text-gold text-xs font-bold rounded-xl transition">
+                        <i class="fa-solid fa-eye mr-1"></i>Reveal All
+                    </button>
+                    <button onclick="prevQuestion()" class="px-3 py-2 bg-purpleDark hover:bg-black text-gray-300 text-xs font-bold rounded-xl border border-gray-700 transition">
+                        <i class="fa-solid fa-chevron-left"></i>
+                    </button>
+                    <button onclick="nextQuestion()" class="px-4 py-2 bg-gradient-to-r from-marigold to-gold text-purpleDark font-black text-xs md:text-sm rounded-xl shadow-lg transition active:scale-95">
+                        Next Question <i class="fa-solid fa-chevron-right ml-1"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- FAST MONEY SECTION -->
+    <main id="fastMoneySection" class="max-w-6xl w-full mx-auto px-4 py-4 flex-grow flex-col justify-between hidden">
+        
+        <!-- FAST MONEY HEADER & TIMER -->
+        <div class="bg-purpleCard border-2 border-gold rounded-2xl p-4 mb-6 flex flex-wrap justify-between items-center gap-4 shadow-2xl">
+            <div>
+                <h2 class="text-2xl font-black text-gold glow-gold tracking-wider font-festive">⚡ FAST MONEY ROUND</h2>
+                <p class="text-xs text-gray-300">Target Score to Win: <span class="text-gold font-bold">200 Points</span></p>
+            </div>
+
+            <!-- Timer Box -->
+            <div class="flex items-center space-x-4">
+                <div class="text-center bg-purpleDark border border-gold/50 rounded-xl px-5 py-2">
+                    <div class="text-[10px] text-gray-400 uppercase font-bold tracking-widest">Time Remaining</div>
+                    <div id="fastTimerDisplay" class="text-4xl font-black text-marigold glow-marigold font-mono">20</div>
+                </div>
+                
+                <div class="flex flex-col space-y-2">
+                    <button id="startTimerBtn" onclick="startFastTimer()" class="px-4 py-1.5 bg-green-600 hover:bg-green-500 text-white font-bold text-xs rounded-lg transition shadow">
+                        <i class="fa-solid fa-play mr-1"></i>Start Timer
+                    </button>
+                    <button onclick="stopFastTimer()" class="px-4 py-1.5 bg-red-600/80 hover:bg-red-600 text-white font-bold text-xs rounded-lg transition">
+                        <i class="fa-solid fa-pause mr-1"></i>Pause
+                    </button>
+                </div>
+            </div>
+
+            <!-- Player Switcher -->
+            <div class="flex bg-purpleDark p-1 rounded-xl border border-marigold/30">
+                <button id="p1TabBtn" onclick="switchFastPlayer(1)" class="px-4 py-2 rounded-lg font-bold text-xs transition bg-gold text-purpleDark">
+                    Player 1 (20s)
+                </button>
+                <button id="p2TabBtn" onclick="switchFastPlayer(2)" class="px-4 py-2 rounded-lg font-bold text-xs transition text-gray-400 hover:text-white">
+                    Player 2 (25s)
+                </button>
+            </div>
+        </div>
+
+        <!-- FAST MONEY QUESTIONS GRID TABLE -->
+        <div class="bg-purpleCard/90 border border-gold/30 rounded-2xl p-4 mb-6 shadow-2xl overflow-x-auto">
+            <table class="w-full text-left border-collapse min-w-[600px]">
+                <thead>
+                    <tr class="border-b border-purpleLight text-marigold text-xs font-bold uppercase tracking-wider">
+                        <th class="p-3"># Question</th>
+                        <th class="p-3 text-center">Player 1 Answer</th>
+                        <th class="p-3 text-center w-24">P1 Pts</th>
+                        <th class="p-3 text-center">Player 2 Answer</th>
+                        <th class="p-3 text-center w-24">P2 Pts</th>
+                    </tr>
+                </thead>
+                <tbody id="fastMoneyTableBody" class="divide-y divide-purpleLight/50 text-sm">
+                    <!-- Populated by JS -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- FAST MONEY SCORE & HOST TOOLS -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+            <!-- Duplicate Sound Button -->
+            <button onclick="playDuplicateSound()" class="bg-magenta/20 border-2 border-magenta hover:bg-magenta/40 text-white font-bold p-3 rounded-xl flex items-center justify-center space-x-2 transition shadow-lg">
+                <i class="fa-solid fa-triangle-exclamation text-xl text-magenta"></i>
+                <span>DUPLICATE ANSWER BUZZER</span>
+            </button>
+
+            <!-- Total Score Indicator -->
+            <div class="bg-purpleCard border-2 border-gold rounded-xl p-3 text-center shadow-xl">
+                <div class="text-xs text-gold uppercase font-bold tracking-widest">Combined Total Score</div>
+                <div id="fastTotalScore" class="text-4xl font-black text-white glow-gold">0</div>
+            </div>
+
+            <!-- Check Win Button -->
+            <button onclick="checkFastMoneyWin()" class="bg-gradient-to-r from-gold to-marigold text-purpleDark font-black p-3 rounded-xl shadow-xl transition hover:opacity-90 active:scale-95 flex items-center justify-center space-x-2">
+                <i class="fa-solid fa-trophy text-lg"></i>
+                <span>CALCULATE / CHECK WIN</span>
+            </button>
+        </div>
+    </main>
+
+    <!-- STRIKE OVERLAY DISPLAY -->
+    <div id="strikeOverlay" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center pointer-events-none opacity-0 transition-opacity duration-200">
+        <div id="strikeIconsContainer" class="flex space-x-6 md:space-x-12">
+            <!-- X Marks injected dynamically -->
+        </div>
+    </div>
+
+    <!-- FOOTER & AUDIO NOTICE -->
+    <footer class="w-full bg-purpleDark/90 border-t border-marigold/20 py-3 text-center text-xs text-gray-400">
+        <p>Día de los Muertos Family Feud • Complete with Web Audio API Sound Effects</p>
+    </footer>
+
+    <!-- JAVASCRIPT GAME LOGIC & SOUND ENGINE -->
+    <script>
+        /* ==========================================================================
+           1. WEB AUDIO API SYNTHESIZER SOUND ENGINE
+           ========================================================================== */
+        class FeudSoundEngine {
+            constructor() {
+                this.ctx = null;
+            }
+
+            init() {
+                if (!this.ctx) {
+                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
+            }
+
+            // Play correct answer bell / chime (Día de los Muertos fiesta bell tone)
+            playDing() {
+                this.init();
+                const now = this.ctx.currentTime;
+                
+                // High bell note 1
+                const osc1 = this.ctx.createOscillator();
+                const gain1 = this.ctx.createGain();
+                osc1.type = 'sine';
+                osc1.frequency.setValueAtTime(987.77, now); // B5
+                gain1.gain.setValueAtTime(0.5, now);
+                gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
+                osc1.connect(gain1);
+                gain1.connect(this.ctx.destination);
+                osc1.start(now);
+                osc1.stop(now + 0.8);
+
+                // High bell note 2 (Harmonic octave)
+                const osc2 = this.ctx.createOscillator();
+                const gain2 = this.ctx.createGain();
+                osc2.type = 'triangle';
+                osc2.frequency.setValueAtTime(1975.53, now + 0.1); // B6
+                gain2.gain.setValueAtTime(0.4, now + 0.1);
+                gain2.gain.exponentialRampToValueAtTime(0.001, now + 1.2);
+                osc2.connect(gain2);
+                gain2.connect(this.ctx.destination);
+                osc2.start(now + 0.1);
+                osc2.stop(now + 1.2);
+            }
+
+            // Play Classic Game Show Buzzer (Strike X)
+            playStrike() {
+                this.init();
+                const now = this.ctx.currentTime;
+                
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                
+                osc.type = 'sawtooth';
+                // Harsh low frequency buzz
+                osc.frequency.setValueAtTime(130, now);
+                osc.frequency.setValueAtTime(120, now + 0.1);
+                
+                gain.gain.setValueAtTime(0.6, now);
+                gain.gain.linearRampToValueAtTime(0.6, now + 0.45);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+                
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                
+                osc.start(now);
+                osc.stop(now + 0.5);
+            }
+
+            // Play Duplicate Answer Sound (Fast Money)
+            playDuplicate() {
+                this.init();
+                const now = this.ctx.currentTime;
+                
+                for (let i = 0; i < 2; i++) {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    
+                    osc.type = 'square';
+                    osc.frequency.setValueAtTime(180, now + i * 0.2);
+                    
+                    gain.gain.setValueAtTime(0.5, now + i * 0.2);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.2 + 0.15);
+                    
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    
+                    osc.start(now + i * 0.2);
+                    osc.stop(now + i * 0.2 + 0.15);
+                }
+            }
+
+            // Fast Money Timer Tick Sound
+            playTick() {
+                this.init();
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(800, now);
+                osc.frequency.exponentialRampToValueAtTime(400, now + 0.05);
+                
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+                
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                
+                osc.start(now);
+                osc.stop(now + 0.05);
+            }
+
+            // Win Fanfare Celebration Sound
+            playWinFanfare() {
+                this.init();
+                const now = this.ctx.currentTime;
+                const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+                
+                notes.forEach((freq, idx) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, now + idx * 0.12);
+                    
+                    gain.gain.setValueAtTime(0.4, now + idx * 0.12);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.12 + 0.6);
+                    
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    
+                    osc.start(now + idx * 0.12);
+                    osc.stop(now + idx * 0.12 + 0.6);
+                });
+            }
+        }
+
+        const audio = new FeudSoundEngine();
+
+        /* ==========================================================================
+           2. DATA STRUCTURES & GAME STATE
+           ========================================================================== */
+        const mainQuestionsData = [
+            {
+                question: "1. Name something you would find on a traditional Día de los Muertos Ofrenda (altar).",
+                answers: [
+                    { text: "Marigolds / Cempasúchil", points: 38 },
+                    { text: "Photos of loved ones", points: 24 },
+                    { text: "Pan de Muerto (Bread)", points: 15 },
+                    { text: "Sugar Skulls (Calaveritas)", points: 12 },
+                    { text: "Candles / Veladora", points: 7 },
+                    { text: "Favorite food or drink of the deceased", points: 4 }
+                ]
+            },
+            {
+                question: "2. Name a famous symbol or character associated with Día de los Muertos.",
+                answers: [
+                    { text: "La Catrina (Elegant Skeleton Lady)", points: 42 },
+                    { text: "Calaveras / Skellies", points: 28 },
+                    { text: "Alebrijes (Spirit Guides)", points: 14 },
+                    { text: "Monarch Butterflies", points: 9 },
+                    { text: "Coco (from the Disney movie)", points: 7 }
+                ]
+            },
+            {
+                question: "3. Name a food or drink item served during Day of the Dead celebrations.",
+                answers: [
+                    { text: "Pan de Muerto", points: 45 },
+                    { text: "Sugar Skulls", points: 22 },
+                    { text: "Tamales", points: 16 },
+                    { text: "Atole or Champurrado", points: 10 },
+                    { text: "Tequila / Mezcal", points: 7 }
+                ]
+            },
+            {
+                question: "4. Name a location where people celebrate Día de los Muertos.",
+                answers: [
+                    { text: "Cemetery / Graveyard", points: 52 },
+                    { text: "At Home / Living Room", points: 25 },
+                    { text: "City Center / Town Square", points: 12 },
+                    { text: "Church", points: 7 },
+                    { text: "Parade / Festival Street", points: 4 }
+                ]
+            },
+            {
+                question: "5. Name something people use to dress up or decorate themselves for Día de los Muertos.",
+                answers: [
+                    { text: "Skull Face Paint / Calavera Makeup", points: 48 },
+                    { text: "Flower Crowns / Floral Headpieces", points: 26 },
+                    { text: "Traditional Mexican Attire / Suits", points: 14 },
+                    { text: "Skeleton Costumes", points: 8 },
+                    { text: "Veils", points: 4 }
+                ]
+            }
+        ];
+
+        const fastMoneyData = [
+            {
+                q: "1. Color strongly associated with Día de los Muertos",
+                options: [
+                    { text: "Yellow / Orange", pts: 48 },
+                    { text: "Purple", pts: 24 },
+                    { text: "Red", pts: 14 },
+                    { text: "White", pts: 9 },
+                    { text: "Black", pts: 5 }
+                ]
+            },
+            {
+                q: "2. Offering left on an ofrenda for children (angelitos)",
+                options: [
+                    { text: "Toys", pts: 41 },
+                    { text: "Sweets / Candy / Chocolate", pts: 32 },
+                    { text: "Milk", pts: 15 },
+                    { text: "Pan de Muerto", pts: 8 },
+                    { text: "Favorite Blanket", pts: 4 }
+                ]
+            },
+            {
+                q: "3. Date in November Día de los Muertos is primarily celebrated",
+                options: [
+                    { text: "November 2nd", pts: 62 },
+                    { text: "November 1st", pts: 34 },
+                    { text: "November 3rd", pts: 4 }
+                ]
+            },
+            {
+                q: "4. Something you light during Día de los Muertos to guide spirits",
+                options: [
+                    { text: "Candles / Velas", pts: 78 },
+                    { text: "Incense / Copal", pts: 12 },
+                    { text: "Bonfire / Fire", pts: 6 },
+                    { text: "Lanterns", pts: 4 }
+                ]
+            },
+            {
+                q: "5. Tissue paper decoration cut into intricate designs",
+                options: [
+                    { text: "Papel Picado", pts: 81 },
+                    { text: "Paper Flowers", pts: 12 },
+                    { text: "Piñata", pts: 4 },
+                    { text: "Streamers", pts: 3 }
+                ]
+            }
+        ];
+
+        // Global State Variables
+        let currentQuestionIndex = 0;
+        let team1Total = 0;
+        let team2Total = 0;
+        let activePot = 0;
+        let strikes = 0;
+        let revealedCards = [];
+
+        // Fast Money State
+        let currentFastPlayer = 1;
+        let fastTimerInterval = null;
+        let fastTimeRemaining = 20;
+        let fastPlayer1Data = Array(5).fill({ text: '', pts: 0 });
+        let fastPlayer2Data = Array(5).fill({ text: '', pts: 0 });
+
+        /* ==========================================================================
+           3. MAIN ROUND GAME LOGIC
+           ========================================================================== */
+        function loadCurrentQuestion() {
+            const currentQ = mainQuestionsData[currentQuestionIndex];
+            document.getElementById('questionText').innerText = currentQ.question;
+            document.getElementById('roundIndicator').innerText = `Round ${currentQuestionIndex + 1} of 5`;
+            
+            const grid = document.getElementById('answersGrid');
+            grid.innerHTML = '';
+            revealedCards = new Array(currentQ.answers.length).fill(false);
+            activePot = 0;
+            updatePotDisplay();
+
+            currentQ.answers.forEach((ans, index) => {
+                const cardHTML = `
+                    <div class="card-container h-16 cursor-pointer" id="card-${index}" onclick="revealAnswer(${index})">
+                        <div class="card-inner">
+                            <div class="card-front font-black text-xl md:text-2xl">
+                                <span class="w-10 h-10 rounded-full bg-purpleDark border border-marigold/60 flex items-center justify-center text-marigold shadow-inner">
+                                    ${index + 1}
+                                </span>
+                            </div>
+                            <div class="card-back">
+                                <span class="font-bold text-sm md:text-base tracking-wide uppercase truncate pr-2">${ans.text}</span>
+                                <span class="font-black text-xl md:text-2xl bg-gold text-purpleDark px-3 py-1 rounded-md shadow">${ans.points}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                grid.innerHTML += cardHTML;
+            });
+
+            clearStrikes();
+        }
+
+        function revealAnswer(index) {
+            if (revealedCards[index]) return; // Already revealed
+
+            audio.playDing();
+            revealedCards[index] = true;
+            const cardElem = document.getElementById(`card-${index}`);
+            cardElem.classList.add('flipped');
+
+            const points = mainQuestionsData[currentQuestionIndex].answers[index].points;
+            activePot += points;
+            updatePotDisplay();
+        }
+
+        function revealAllAnswers() {
+            const currentQ = mainQuestionsData[currentQuestionIndex];
+            currentQ.answers.forEach((_, idx) => {
+                if (!revealedCards[idx]) {
+                    revealAnswer(idx);
+                }
+            });
+        }
+
+        function addStrike() {
+            if (strikes < 3) {
+                strikes++;
+                audio.playStrike();
+                showStrikeOverlay();
+                updateStrikeDisplay();
+            }
+        }
+
+        function clearStrikes() {
+            strikes = 0;
+            updateStrikeDisplay();
+        }
+
+        function updateStrikeDisplay() {
+            document.getElementById('strikeCounterDisplay').innerText = `Strikes: ${strikes}/3`;
+        }
+
+        function showStrikeOverlay() {
+            const overlay = document.getElementById('strikeOverlay');
+            const container = document.getElementById('strikeIconsContainer');
+            container.innerHTML = '';
+
+            for (let i = 0; i < strikes; i++) {
+                container.innerHTML += `<i class="fa-solid fa-xmark text-7xl md:text-9xl text-red-600 drop-shadow-[0_0_20px_rgba(220,38,38,0.8)] animate-strike"></i>`;
+            }
+
+            overlay.style.opacity = '1';
+            setTimeout(() => {
+                overlay.style.opacity = '0';
+            }, 1200);
+        }
+
+        function updatePotDisplay() {
+            document.getElementById('currentPot').innerText = activePot;
+        }
+
+        function awardPoints(teamNumber) {
+            if (activePot === 0) return;
+
+            audio.playWinFanfare();
+            if (teamNumber === 1) {
+                team1Total += activePot;
+                document.getElementById('team1Score').innerText = team1Total;
+            } else {
+                team2Total += activePot;
+                document.getElementById('team2Score').innerText = team2Total;
+            }
+
+            activePot = 0;
+            updatePotDisplay();
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIndex < mainQuestionsData.length - 1) {
+                currentQuestionIndex++;
+                loadCurrentQuestion();
+            } else {
+                alert("You've reached the final main round question! Switch to Fast Money mode.");
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                loadCurrentQuestion();
+            }
+        }
+
+        /* ==========================================================================
+           4. FAST MONEY GAME LOGIC
+           ========================================================================== */
+        function renderFastMoneyTable() {
+            const tbody = document.getElementById('fastMoneyTableBody');
+            tbody.innerHTML = '';
+
+            fastMoneyData.forEach((qData, qIdx) => {
+                const p1 = fastPlayer1Data[qIdx];
+                const p2 = fastPlayer2Data[qIdx];
+
+                const row = document.createElement('tr');
+                row.className = "hover:bg-purpleLight/30 transition";
+                row.innerHTML = `
+                    <td class="p-3 font-semibold text-gray-200">
+                        <div class="text-xs text-marigold font-bold">Q${qIdx + 1}</div>
+                        ${qData.q}
+                    </td>
+                    
+                    <!-- Player 1 Select -->
+                    <td class="p-2 text-center">
+                        <select onchange="handleFastAnswerChange(1, ${qIdx}, this.value)" class="w-full bg-purpleDark border border-marigold/40 rounded px-2 py-1.5 text-xs text-white focus:outline-none focus:border-gold">
+                            <option value="">-- Select Answer --</option>
+                            ${qData.options.map(opt => `<option value="${opt.text}" ${p1.text === opt.text ? 'selected' : ''}>${opt.text} (${opt.pts})</option>`).join('')}
+                        </select>
+                    </td>
+                    <td class="p-2 text-center font-bold text-gold text-base">${p1.pts}</td>
+
+                    <!-- Player 2 Select -->
+                    <td class="p-2 text-center">
+                        <select onchange="handleFastAnswerChange(2, ${qIdx}, this.value)" class="w-full bg-purpleDark border border-magenta/40 rounded px-2 py-1.5 text-xs text-white focus:outline-none focus:border-magenta">
+                            <option value="">-- Select Answer --</option>
+                            ${qData.options.map(opt => `<option value="${opt.text}" ${p2.text === opt.text ? 'selected' : ''}>${opt.text} (${opt.pts})</option>`).join('')}
+                        </select>
+                    </td>
+                    <td class="p-2 text-center font-bold text-gold text-base">${p2.pts}</td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            calculateFastTotal();
+        }
+
+        function handleFastAnswerChange(playerNum, qIndex, selectedText) {
+            audio.playDing();
+            const qData = fastMoneyData[qIndex];
+            const matchedOpt = qData.options.find(o => o.text === selectedText);
+            const points = matchedOpt ? matchedOpt.pts : 0;
+
+            if (playerNum === 1) {
+                fastPlayer1Data[qIndex] = { text: selectedText, pts: points };
+            } else {
+                fastPlayer2Data[qIndex] = { text: selectedText, pts: points };
+            }
+
+            renderFastMoneyTable();
+        }
+
+        function calculateFastTotal() {
+            const p1Total = fastPlayer1Data.reduce((acc, curr) => acc + curr.pts, 0);
+            const p2Total = fastPlayer2Data.reduce((acc, curr) => acc + curr.pts, 0);
+            const grandTotal = p1Total + p2Total;
+
+            document.getElementById('fastTotalScore').innerText = grandTotal;
+            return grandTotal;
+        }
+
+        function switchFastPlayer(playerNum) {
+            currentFastPlayer = playerNum;
+            stopFastTimer();
+
+            const p1Btn = document.getElementById('p1TabBtn');
+            const p2Btn = document.getElementById('p2TabBtn');
+
+            if (playerNum === 1) {
+                p1Btn.className = "px-4 py-2 rounded-lg font-bold text-xs transition bg-gold text-purpleDark";
+                p2Btn.className = "px-4 py-2 rounded-lg font-bold text-xs transition text-gray-400 hover:text-white";
+                fastTimeRemaining = 20;
+            } else {
+                p2Btn.className = "px-4 py-2 rounded-lg font-bold text-xs transition bg-gold text-purpleDark";
+                p1Btn.className = "px-4 py-2 rounded-lg font-bold text-xs transition text-gray-400 hover:text-white";
+                fastTimeRemaining = 25;
+            }
+
+            document.getElementById('fastTimerDisplay').innerText = fastTimeRemaining;
+        }
+
+        function startFastTimer() {
+            stopFastTimer();
+            fastTimerInterval = setInterval(() => {
+                if (fastTimeRemaining > 0) {
+                    fastTimeRemaining--;
+                    audio.playTick();
+                    document.getElementById('fastTimerDisplay').innerText = fastTimeRemaining;
+                } else {
+                    stopFastTimer();
+                    audio.playStrike(); // Time's up buzzer
+                }
+            }, 1000);
+        }
+
+        function stopFastTimer() {
+            if (fastTimerInterval) {
+                clearInterval(fastTimerInterval);
+                fastTimerInterval = null;
+            }
+        }
+
+        function playDuplicateSound() {
+            audio.playDuplicate();
+        }
+
+        function checkFastMoneyWin() {
+            const grandTotal = calculateFastTotal();
+            if (grandTotal >= 200) {
+                audio.playWinFanfare();
+                confetti({
+                    particleCount: 120,
+                    spread: 80,
+                    origin: { y: 0.6 }
+                });
+                alert(`🎉 WINNER! Combined Score is ${grandTotal} Points! You reached the 200 threshold!`);
+            } else {
+                alert(`Current total score is ${grandTotal} points. You need ${200 - grandTotal} more points to reach 200!`);
+            }
+        }
+
+        /* ==========================================================================
+           5. NAVIGATION & MODE SWITCHING
+           ========================================================================== */
+        function switchMode(mode) {
+            const mainSec = document.getElementById('mainGameSection');
+            const fastSec = document.getElementById('fastMoneySection');
+            const mainBtn = document.getElementById('navMainBtn');
+            const fastBtn = document.getElementById('navFastBtn');
+
+            if (mode === 'main') {
+                mainSec.classList.remove('hidden');
+                mainSec.classList.add('flex');
+                fastSec.classList.add('hidden');
+                fastSec.classList.remove('flex');
+
+                mainBtn.className = "px-4 py-2 rounded-md font-bold text-sm transition-all bg-marigold text-purpleDark shadow-lg";
+                fastBtn.className = "px-4 py-2 rounded-md font-bold text-sm transition-all text-gray-300 hover:text-white hover:bg-purpleLight";
+            } else {
+                fastSec.classList.remove('hidden');
+                fastSec.classList.add('flex');
+                mainSec.classList.add('hidden');
+                mainSec.classList.remove('flex');
+
+                fastBtn.className = "px-4 py-2 rounded-md font-bold text-sm transition-all bg-gold text-purpleDark shadow-lg";
+                mainBtn.className = "px-4 py-2 rounded-md font-bold text-sm transition-all text-gray-300 hover:text-white hover:bg-purpleLight";
+                
+                renderFastMoneyTable();
+            }
+        }
+
+        // Initialize on Load
+        window.onload = function() {
+            loadCurrentQuestion();
+        };
+    </script>
+</body>
+</html>
